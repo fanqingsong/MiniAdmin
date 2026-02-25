@@ -80,4 +80,6 @@ def main():
 
 if __name__ == '__main__':
     print('少年，我看你骨骼精奇，是万中无一的编程奇才，有个程序员大佬qq群[217840699]你加下吧!维护世界和平就靠你了！')
-    uvicorn.run(app='main:app', host="127.0.0.1", port=8000, reload=True, )
+    # 支持通过环境变量配置 host，Docker 环境使用 0.0.0.0
+    host = os.getenv("BACKEND_HOST", "127.0.0.1")
+    uvicorn.run(app='main:app', host=host, port=8000, reload=True, )

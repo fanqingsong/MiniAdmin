@@ -41,12 +41,28 @@ def get_db_to_T_E_S_T():
         db.close()
 
 
-# 组装数据库的绝对地址
-DB_DIR = os.path.join(BASE_DIR, 'miniadmin_data.db')
-# 数据库访问地址
-SQLALCHEMY_DATABASE_URL = "sqlite:///" + DB_DIR
-# 创建物理SQLite数据库
-engine = create_engine(SQLALCHEMY_DATABASE_URL + '?check_same_thread=False', echo=False, )
+# 数据库配置 - 支持环境变量配置 PostgreSQL
+# 默认使用 SQLite，可通过环境变量切换到 PostgreSQL
+DB_TYPE = os.getenv("DB_TYPE", "sqlite")
+
+if DB_TYPE == "postgresql":
+    # PostgreSQL 配置
+    DB_HOST = os.getenv("DB_HOST", "postgres")
+    DB_PORT = os.getenv("DB_PORT", "5432")
+    DB_NAME = os.getenv("DB_NAME", "miniadmin")
+    DB_USER = os.getenv("DB_USER", "miniadmin")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "miniadmin123")
+
+    SQLALCHEMY_DATABASE_URL = (
+        f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, pool_pre_ping=True)
+else:
+    # SQLite 配置（默认，用于开发测试）
+    DB_DIR = os.path.join(BASE_DIR, 'miniadmin_data.db')
+    SQLALCHEMY_DATABASE_URL = "sqlite:///" + DB_DIR
+    engine = create_engine(SQLALCHEMY_DATABASE_URL + '?check_same_thread=False', echo=False)
+
 # 启动会话
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, )
 
